@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedido Integrado (GPS + WhatsApp)</title>
+<style>
+:root{
+    --fundo-900:#08050e;
+    --fundo-800:#0f0a1a;
+    --fundo-700:#161022;
+
+    --superficie:#1b122b;
+    --superficie-2:#221635;
+    --superficie-3:#2a1e40;
+
+    --borda:#3a2a55;
+    --borda-forte:#4c3570;
+
+    --texto:#f5f3ff;
+    --texto-suave:#b8aed6;
+    --texto-fraco:#8b80a8;
+
+    --roxo-900:#3b0764;
+    --roxo-800:#4c1d95;
+    --roxo-700:#6d28d9;
+    --roxo-600:#7c3aed;
+    --roxo-500:#8b5cf6;
+    --roxo-400:#a78bfa;
+    --roxo-300:#c4b5fd;
+    --roxo-200:#ddd6fe;
+    --roxo-100:#ede9fe;
+    --roxo-50:#f5f3ff;
+
+    --sombra-card:0 24px 60px -18px rgba(0,0,0,.85),
+                  0 0 0 1px rgba(139,92,246,.10);
+    --sombra-btn:0 10px 24px -8px rgba(139,92,246,.55);
+
+    color-scheme:dark;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html{ -webkit-text-size-adjust:100%; }
+
+body{
+    min-height:100vh;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color:var(--texto);
+    padding:24px 16px 40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(900px 500px at 12% -10%, rgba(109,40,217,.28) 0%, transparent 60%),
+        radial-gradient(800px 500px at 100% 0%, rgba(139,92,246,.18) 0%, transparent 55%),
+        linear-gradient(170deg, #08050e 0%, #0f0a1a 100%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+/* ---------- CARD ---------- */
+.card-app{
+    position:relative;
+    width:100%;
+    max-width:460px;
+    background:var(--superficie);
+    padding:32px 28px 28px;
+    border-radius:22px;
+    border:1px solid var(--borda);
+    box-shadow:var(--sombra-card);
+    overflow:hidden;
+    animation:subir .5s cubic-bezier(.22,1,.36,1) both;
+}
+
+.card-app::before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:5px;
+    background:linear-gradient(90deg, var(--roxo-800), var(--roxo-500) 50%, var(--roxo-400));
+}
+
+@keyframes subir{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
+/* ---------- CABEÇALHO ---------- */
+.app-header{
+    text-align:center;
+    margin-bottom:26px;
+}
+
+.app-icon{
+    width:56px; height:56px;
+    margin:0 auto 14px;
+    border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(140deg, var(--roxo-600), var(--roxo-900));
+    box-shadow:0 12px 26px -10px rgba(109,40,217,.85);
+    color:#fff;
+}
+
+.app-icon svg{ width:26px; height:26px; }
+
+.card-app h2{
+    font-size:1.35rem;
+    font-weight:800;
+    letter-spacing:-.02em;
+    background:linear-gradient(100deg, var(--roxo-300), var(--roxo-500));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:8px;
+}
+
+.card-app > .app-header p{
+    color:var(--texto-suave);
+    font-size:.86rem;
+    line-height:1.5;
+    max-width:300px;
+    margin:0 auto;
+}
+
+/* ---------- FORMULÁRIO ---------- */
+.campo{ margin-bottom:16px; }
+
+.card-app label{
+    display:block;
+    font-size:.72rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--roxo-300);
+    margin-bottom:7px;
+}
+
+.card-app input,
+.card-app textarea{
+    width:100%;
+    padding:13px 15px;
+    background:var(--superficie-2);
+    border:1.6px solid var(--borda);
+    border-radius:13px;
+    font-size:.92rem;
+    font-family:inherit;
+    color:var(--texto);
+    resize:vertical;
+    transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.card-app input::placeholder,
+.card-app textarea::placeholder{ color:var(--texto-fraco); }
+
+.card-app input:hover,
+.card-app textarea:hover{ border-color:var(--borda-forte); }
+
+.card-app input:focus,
+.card-app textarea:focus{
+    outline:none;
+    background:var(--superficie-3);
+    border-color:var(--roxo-400);
+    box-shadow:0 0 0 4px rgba(139,92,246,.20);
+}
+
+/* ---------- BOTÕES ---------- */
+.btn-local,
+.btn-enviar,
+.btn-compartilhar{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    font-family:inherit;
+    font-weight:700;
+    cursor:pointer;
+    border-radius:13px;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.btn-local svg,
+.btn-enviar svg,
+.btn-compartilhar svg{ width:18px; height:18px; flex:none; }
+
+.btn-local:focus-visible,
+.btn-enviar:focus-visible,
+.btn-compartilhar:focus-visible,
+.card-app input:focus-visible,
+.card-app textarea:focus-visible{
+    outline:2px solid var(--roxo-400);
+    outline-offset:2px;
+}
+
+/* Secundário */
+.btn-local{
+    margin-top:4px;
+    padding:13px;
+    font-size:.88rem;
+    color:var(--roxo-300);
+    background:rgba(139,92,246,.12);
+    border:1.6px solid var(--borda-forte);
+}
+
+.btn-local:hover{
+    background:rgba(139,92,246,.20);
+    border-color:var(--roxo-500);
+}
+
+.btn-local:active{ transform:scale(.985); }
+
+/* Primário */
+.btn-enviar{
+    margin-top:14px;
+    padding:15px;
+    font-size:.98rem;
+    font-weight:800;
+    letter-spacing:.01em;
+    color:#fff;
+    border:none;
+    background:linear-gradient(135deg, var(--roxo-600), var(--roxo-800));
+    box-shadow:var(--sombra-btn);
+}
+
+.btn-enviar:hover{
+    transform:translateY(-1px);
+    box-shadow:0 14px 30px -8px rgba(139,92,246,.70);
+}
+
+.btn-enviar:active{ transform:translateY(0) scale(.98); }
+
+/* Terciário */
+.btn-compartilhar{
+    margin-top:10px;
+    padding:13px;
+    font-size:.88rem;
+    color:var(--roxo-300);
+    background:transparent;
+    border:1.6px solid var(--borda-forte);
+}
+
+.btn-compartilhar:hover{
+    background:rgba(139,92,246,.12);
+    border-color:var(--roxo-500);
+}
+
+.btn-compartilhar:active{ transform:scale(.985); }
+
+/* ---------- CAIXA DE LOCALIZAÇÃO ---------- */
+.local-app{
+    margin:16px 0 4px;
+    padding:16px;
+    background:rgba(139,92,246,.08);
+    border:1.6px dashed var(--borda-forte);
+    border-radius:14px;
+    font-size:.85rem;
+    color:var(--texto);
+    min-height:74px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:4px;
+    transition:border-color .2s ease, background .2s ease;
+}
+
+.local-app .linha{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:3px 0;
+    font-variant-numeric:tabular-nums;
+}
+
+.local-app .linha span:first-child{
+    font-weight:700;
+    color:var(--roxo-300);
+    font-size:.76rem;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+}
+
+.local-app .linha span:last-child{
+    font-weight:600;
+    color:var(--texto);
+}
+
+.local-app .ok{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    color:var(--roxo-300);
+    font-size:.82rem;
+    letter-spacing:.01em;
+}
+
+.local-app .ok::before{
+    content:"";
+    width:9px; height:9px;
+    border-radius:50%;
+    background:var(--roxo-400);
+    box-shadow:0 0 0 4px rgba(139,92,246,.25);
+}
+
+/* ---------- RESULTADO ---------- */
+.resultado-app{
+    margin-top:16px;
+    padding:14px 16px;
+    background:var(--superficie-2);
+    border:1px solid var(--borda);
+    border-radius:14px;
+    font-size:.82rem;
+    line-height:1.6;
+    color:var(--texto-suave);
+    min-height:52px;
+    display:flex;
+    align-items:center;
+    word-break:break-word;
+}
+
+.resultado-app strong{ color:var(--roxo-300); }
+
+.resultado-app a{
+    color:var(--roxo-400);
+    font-weight:600;
+    text-decoration:none;
+    border-bottom:1px solid var(--borda-forte);
+}
+
+.resultado-app a:hover{ border-bottom-color:var(--roxo-400); }
+
+/* ---------- ESTADOS DE TEXTO ---------- */
+.vazio{
+    color:var(--texto-fraco);
+    font-style:italic;
+    font-size:.84rem;
+    text-align:center;
+    width:100%;
+}
+
+.msg-erro{ color:#fca5a5; font-weight:600; }
+.msg-alerta{ color:#fcd34d; font-weight:600; }
+.msg-ok{ color:var(--roxo-300); font-weight:700; }
+
+/* ---------- RODAPÉ ---------- */
+.app-rodape{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid var(--borda);
+    text-align:center;
+    font-size:.72rem;
+    color:var(--texto-fraco);
+    letter-spacing:.02em;
+}
+
+/* ---------- RESPONSIVO ---------- */
+@media (max-width:420px){
+    body{ padding:14px 12px 28px; align-items:flex-start; }
+    .card-app{ padding:26px 20px 22px; border-radius:18px; }
+    .card-app h2{ font-size:1.2rem; }
+    .app-icon{ width:50px; height:50px; border-radius:14px; }
+}
+</style>
+</head>
+<body>
+<div class="card-app">
+
+    <div class="app-header">
+        <div class="app-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/>
+                <circle cx="12" cy="10" r="3"/>
+            </svg>
+        </div>
+        <h2>Pedido com Localização</h2>
+        <p>Preencha os dados, capture o GPS e envie o pedido pelo WhatsApp.</p>
+    </div>
+
+    <div class="campo">
+        <label for="appNome">Seu nome</label>
+        <input type="text" id="appNome" value="João Silva" placeholder="Digite seu nome">
+    </div>
+
+    <div class="campo">
+        <label for="appPedido">O que você precisa?</label>
+        <textarea id="appPedido" rows="3" placeholder="Descreva seu pedido...">Quero um fone bluetooth com entrega urgente.</textarea>
+    </div>
+
+    <div class="campo">
+        <label for="appZap">WhatsApp de destino</label>
+        <input type="tel" id="appZap" value="5532999999999" placeholder="5532999999999" inputmode="numeric">
+    </div>
+
+    <button class="btn-local" onclick="capturarGpsApp()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+        </svg>
+        Capturar minha localização
+    </button>
+
+    <div class="local-app" id="appGps">
+        <span class="vazio">Localização não capturada</span>
+    </div>
+
+    <button class="btn-enviar" onclick="enviarPedidoZap()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
+        </svg>
+        Enviar pedido por WhatsApp
+    </button>
+
+    <button class="btn-compartilhar" onclick="compartilharPedido()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>
+        </svg>
+        Compartilhar pedido
+    </button>
+
+    <div class="resultado-app" id="resultadoApp">
+        <span class="vazio">Aguardando ação</span>
+    </div>
+
+    <div class="app-rodape">
+        Seus dados são usados apenas para montar a mensagem.
+    </div>
+</div>
+
+<script>
+let gpsApp = null;
+
+function capturarGpsApp() {
+    const res = document.getElementById("appGps");
+
+    if (!navigator.geolocation) {
+        res.innerHTML = '<span class="msg-erro">GPS não suportado neste dispositivo.</span>';
+        return;
+    }
+
+    res.innerHTML = '<span class="vazio">Obtendo localização...</span>';
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            gpsApp = {
+                lat: pos.coords.latitude.toFixed(6),
+                lon: pos.coords.longitude.toFixed(6)
+            };
+            res.innerHTML =
+                '<div class="ok">Localização capturada</div>' +
+                '<div class="linha"><span>Latitude</span><span>' + gpsApp.lat + '</span></div>' +
+                '<div class="linha"><span>Longitude</span><span>' + gpsApp.lon + '</span></div>';
+        },
+        function() {
+            res.innerHTML = '<span class="msg-erro">Não foi possível obter o GPS.</span>';
+        },
+        { enableHighAccuracy: true, timeout: 12000 }
+    );
+}
+
+function montarMensagem() {
+    const nome = document.getElementById("appNome").value.trim() || "Cliente";
+    const pedido = document.getElementById("appPedido").value.trim() || "Sem descrição";
+
+    let msg = "Olá! Meu nome é " + nome + ".\nPedido: " + pedido;
+
+    if (gpsApp) {
+        msg += "\nLocalização: https://www.google.com/maps?q=" + gpsApp.lat + "," + gpsApp.lon;
+    }
+    return msg;
+}
+
+function enviarPedidoZap() {
+    const numero = document.getElementById("appZap").value.replace(/\D/g, "");
+    const res = document.getElementById("resultadoApp");
+
+    if (!numero) {
+        res.innerHTML = '<span class="msg-erro">Digite o WhatsApp de destino.</span>';
+        return;
+    }
+
+    const msg = montarMensagem();
+    const url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(msg);
+
+    res.innerHTML =
+        '<div><strong>Link gerado</strong><br>' +
+        '<a href="' + url + '" target="_blank" rel="noopener">' + url + '</a></div>';
+
+    window.open(url, "_blank");
+}
+
+function compartilharPedido() {
+    const res = document.getElementById("resultadoApp");
+
+    if (!navigator.share) {
+        res.innerHTML = '<span class="msg-alerta">Compartilhamento não suportado neste navegador.</span>';
+        return;
+    }
+
+    navigator.share({
+        title: "Meu Pedido",
+        text: montarMensagem()
+    })
+    .then(() => {
+        res.innerHTML = '<span class="msg-ok">Pedido compartilhado com sucesso.</span>';
+    })
+    .catch(() => {});
+}
+</script>
+</body>
+</html>
